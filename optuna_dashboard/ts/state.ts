@@ -1,10 +1,6 @@
 import { atom, useRecoilValue } from "recoil"
 import { useQuery } from "./urlQuery"
-
-export const studySummariesState = atom<StudySummary[]>({
-  key: "studySummaries",
-  default: [],
-})
+import { useStudySummary } from "./hooks/useStudySummary"
 
 export const studyDetailsState = atom<StudyDetails>({
   key: "studyDetails",
@@ -44,19 +40,10 @@ export const plotlypyIsAvailableState = atom<boolean>({
   default: true,
 })
 
-export const studySummariesLoadingState = atom<boolean>({
-  key: "studySummariesLoadingState",
-  default: false,
-})
 
 export const useStudyDetailValue = (studyId: number): StudyDetail | null => {
   const studyDetails = useRecoilValue<StudyDetails>(studyDetailsState)
   return studyDetails[studyId] || null
-}
-
-export const useStudySummaryValue = (studyId: number): StudySummary | null => {
-  const studySummaries = useRecoilValue<StudySummary[]>(studySummariesState)
-  return studySummaries.find((s) => s.study_id === studyId) || null
 }
 
 export const useTrialUpdatingValue = (trialId: number): boolean => {
@@ -68,19 +55,19 @@ export const useStudyDirections = (
   studyId: number
 ): StudyDirection[] | null => {
   const studyDetail = useStudyDetailValue(studyId)
-  const studySummary = useStudySummaryValue(studyId)
+  const studySummary = useStudySummary({studyId})
   return studyDetail?.directions || studySummary?.directions || null
 }
 
 export const useStudyIsPreferential = (studyId: number): boolean | null => {
   const studyDetail = useStudyDetailValue(studyId)
-  const studySummary = useStudySummaryValue(studyId)
+  const studySummary = useStudySummary({studyId})
   return studyDetail?.is_preferential || studySummary?.is_preferential || null
 }
 
 export const useStudyName = (studyId: number): string | null => {
   const studyDetail = useStudyDetailValue(studyId)
-  const studySummary = useStudySummaryValue(studyId)
+  const studySummary = useStudySummary({studyId})
   return studyDetail?.name || studySummary?.study_name || null
 }
 

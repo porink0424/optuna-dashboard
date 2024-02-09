@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useRecoilValue } from "recoil"
 import { Link } from "react-router-dom"
 import {
   Typography,
@@ -27,13 +26,13 @@ import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutli
 
 import { actionCreator } from "../action"
 import { DebouncedInputTextField } from "./Debounce"
-import { studySummariesLoadingState, studySummariesState } from "../state"
 import { styled } from "@mui/system"
 import { AppDrawer } from "./AppDrawer"
 import { useCreateStudyDialog } from "./CreateStudyDialog"
 import { useDeleteStudyDialog } from "./DeleteStudyDialog"
 import { useRenameStudyDialog } from "./RenameStudyDialog"
 import { useQuery } from "../urlQuery"
+import { useStudySummaries } from "../hooks/useStudySummary"
 
 export const StudyList: FC<{
   toggleColorMode: () => void
@@ -51,21 +50,20 @@ export const StudyList: FC<{
       return row.study_name.indexOf(k) >= 0
     })
   }
-  const studies = useRecoilValue<StudySummary[]>(studySummariesState)
+  const { studySummaries, isLoading } = useStudySummaries()
   const [openCreateStudyDialog, renderCreateStudyDialog] =
     useCreateStudyDialog()
   const [openDeleteStudyDialog, renderDeleteStudyDialog] =
     useDeleteStudyDialog()
   const [openRenameStudyDialog, renderRenameStudyDialog] =
-    useRenameStudyDialog(studies)
-  const isLoading = useRecoilValue<boolean>(studySummariesLoadingState)
+    useRenameStudyDialog(studySummaries ?? [])
 
   const navigate = useNavigate()
   const query = useQuery()
   const initialSortBy = query.get("studies_order_by") === "asc" ? "asc" : "desc"
   const [sortBy, setSortBy] = useState<"asc" | "desc">(initialSortBy)
 
-  let filteredStudies = studies.filter((s) => !studyFilter(s))
+  let filteredStudies = (studySummaries ?? []).filter((s) => !studyFilter(s))
 
   if (sortBy === "desc") {
     filteredStudies = filteredStudies.reverse()

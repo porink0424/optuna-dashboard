@@ -23,21 +23,17 @@ import {
 } from "./apiClient"
 import {
   studyDetailsState,
-  studySummariesState,
   isFileUploading,
   artifactIsAvailable,
   plotlypyIsAvailableState,
   reloadIntervalState,
   trialsUpdatingState,
-  studySummariesLoadingState,
 } from "./state"
 import { getDominatedTrials } from "./dominatedTrials"
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const actionCreator = () => {
   const { enqueueSnackbar } = useSnackbar()
-  const [studySummaries, setStudySummaries] =
-    useRecoilState<StudySummary[]>(studySummariesState)
   const [studyDetails, setStudyDetails] =
     useRecoilState<StudyDetails>(studyDetailsState)
   const setReloadInterval = useSetRecoilState<number>(reloadIntervalState)
@@ -46,9 +42,6 @@ export const actionCreator = () => {
   const setArtifactIsAvailable = useSetRecoilState<boolean>(artifactIsAvailable)
   const setPlotlypyIsAvailable = useSetRecoilState<boolean>(
     plotlypyIsAvailableState
-  )
-  const setStudySummariesLoading = useSetRecoilState<boolean>(
-    studySummariesLoadingState
   )
 
   const setStudyDetailState = (studyId: number, study: StudyDetail) => {
@@ -210,26 +203,6 @@ export const actionCreator = () => {
     })
   }
 
-  const updateStudySummaries = (successMsg?: string) => {
-    setStudySummariesLoading(true)
-    getStudySummariesAPI()
-      .then((studySummaries: StudySummary[]) => {
-        setStudySummariesLoading(false)
-        setStudySummaries(studySummaries)
-
-        if (successMsg) {
-          enqueueSnackbar(successMsg, { variant: "success" })
-        }
-      })
-      .catch((err) => {
-        setStudySummariesLoading(false)
-        enqueueSnackbar(`Failed to fetch study list.`, {
-          variant: "error",
-        })
-        console.log(err)
-      })
-  }
-
   const updateStudyDetail = (studyId: number) => {
     let nLocalFixedTrials = 0
     if (studyId in studyDetails) {
@@ -256,23 +229,6 @@ export const actionCreator = () => {
             variant: "error",
           })
         }
-        console.log(err)
-      })
-  }
-
-  const createNewStudy = (studyName: string, directions: StudyDirection[]) => {
-    createNewStudyAPI(studyName, directions)
-      .then((study_summary) => {
-        const newVal = [...studySummaries, study_summary]
-        setStudySummaries(newVal)
-        enqueueSnackbar(`Success to create a study (study_name=${studyName})`, {
-          variant: "success",
-        })
-      })
-      .catch((err) => {
-        enqueueSnackbar(`Failed to create a study (study_name=${studyName})`, {
-          variant: "error",
-        })
         console.log(err)
       })
   }
